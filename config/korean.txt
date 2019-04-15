@@ -1,0 +1,104 @@
+# Pure Korean letters without the algorithm implemented yet.
+# Note: The doubled consonants are simply pronounced louder and hence do not have an IPA representation. The barred consonants (k, t, p) are on the other hand, aspirated.
+# Note-to-self: When creating the program, you interpret three character sequences as per the algorithm. That might mean combining consonants into radicals, especially for the final consonants in the algorithm.
+
+$start
+yae:ㅇㅒ
+wae:ㅇㅙ
+ae:ㅇㅐ
+ya:ㅇㅑ
+wa:ㅇㅘ
+a:ㅇㅏ
+yuh:ㅇㅕ
+wuh:ㅇㅝ
+uh:ㅇㅓ
+ye:ㅇㅖ
+we:ㅇㅞ
+e:ㅇㅔ
+yo:ㅇㅛ
+ui:ㅇㅟ
+yu:ㅇㅠ
+yi:ㅇㅢ
+oi:ㅇㅚ
+u:ㅇㅜ
+o:ㅇㅗ
+y:ㅇㅡ
+i:ㅇㅣ
+$
+
+ yae:ㅇㅒ
+ wae:ㅇㅙ
+ ae:ㅇㅐ
+ ya:ㅇㅑ
+ wa:ㅇㅘ
+ a:ㅇㅏ
+ yuh:ㅇㅕ
+ wuh:ㅇㅝ
+ uh:ㅇㅓ
+ ye:ㅇㅖ
+ we:ㅇㅞ
+ e:ㅇㅔ
+ yo:ㅇㅛ
+ ui:ㅇㅟ
+ yu:ㅇㅠ
+ yi:ㅇㅢ
+ oi:ㅇㅚ
+ u:ㅇㅜ
+ o:ㅇㅗ
+ y:ㅇㅡ
+ i:ㅇㅣ
+
+yae:ㅒ
+wae:ㅙ
+ae:ㅐ
+ya:ㅑ
+wa:ㅘ
+a:ㅏ
+yuh:ㅕ
+wuh:ㅝ
+uh:ㅓ
+ye:ㅖ
+we:ㅞ
+e:ㅔ
+yo:ㅛ
+ui:ㅟ
+yu:ㅠ
+yi:ㅢ
+oi:ㅚ
+u:ㅜ
+o:ㅗ
+y:ㅡ
+i:ㅣ
+
+ng:ㅇ
+bb:ㅃ
+b:ㅂ
+ch:ㅊ
+dd:ㄸ
+d:ㄷ
+gg:ㄲ
+g:ㄱ
+h:ㅎ
+jj:ㅉ
+j:ㅈ
+k:ㅋ
+m:ㅁ
+n:ㄴ
+l:ㄹ
+p:ㅍ
+r:ㄹ
+ss:ㅆ
+s:ㅅ
+t:ㅌ
+
+ㄱㅅ:ㄳ
+ㄴㅈ:ㄵ
+ㄴㅎ:ㄶ
+ㄹㄱ:ㄺ
+ㄹㅁ:ㄻ
+ㄹㅂ:ㄼ
+ㄹㅅ:ㄽ
+ㄹㅌ:ㄾ
+ㄹㅍ:ㄿ
+ㄹㅎ:ㅀ
+ㅂㅅ:ㅄ
