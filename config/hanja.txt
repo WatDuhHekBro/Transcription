@@ -1,0 +1,9 @@
+# AFAIK, hanja is only used in literary Korean. However, I don't see any harm in setting up this functionality.
+한:漢
+자:字
+어:語
+대:大
+소:小
+중:中
+산:山
+문:門

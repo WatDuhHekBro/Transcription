@@ -10,8 +10,8 @@ public class Transcription implements KeyListener
 	private JPanel contents;
 	private JTextField lang,input,output,error;
 	private HashMap<String[],String> index;
-	private String language;
 	private int key;
+	private boolean consume;
 	
 	// 72*case + 6*modifier + diacritic = vi_char
 	public static final int[] vi_chars = new int[] // 144 values, these are actual character values
@@ -187,7 +187,7 @@ public class Transcription implements KeyListener
 	
 	public Transcription()
 	{
-		window = new JFrame("Transcription: 15 April, 2019");
+		window = new JFrame("Transcription v1.1");
 		contents = new JPanel();
 		
 		lang = new JTextField();
@@ -226,16 +226,6 @@ public class Transcription implements KeyListener
 	{
 		try
 		{
-			language = null;
-			
-			for(String[] aliases : index.keySet())
-				for(String alias : aliases)
-					if(alias.equals(lang.getText()))
-						language = index.get(aliases);
-			
-			if(language == null)
-				language = "latin_extended.txt";
-			
 			if(lang.getText().equals("vietnamese") || lang.getText().equals("vi"))
 			{
 				output.setEditable(false);
@@ -258,11 +248,11 @@ public class Transcription implements KeyListener
 					
 					input.setText(keep+change);
 				}
-				else if(input.getText().length() >= 2)
+				else if(input.getText().length() >= 1)
 				{
 					int last_index = input.getText().length()-1;
-					String keep = input.getText().substring(0,last_index-1);
-					int change = (int)input.getText().charAt(last_index-1);
+					String keep = input.getText().substring(0,last_index);
+					int change = (int)input.getText().charAt(last_index);
 					boolean changeable = false;
 					boolean changeable_d = false;
 					boolean changed = false;
@@ -365,224 +355,195 @@ public class Transcription implements KeyListener
 					}
 				}
 			}
-			else
+			else if(lang.getText().equals("korean") || lang.getText().equals("ko"))
 			{
 				output.setEditable(true);
-				// "/" = mac, "\\" = windows
-				BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File("config/"+language)),"UTF-8"));
-				String text = input.getText();
-				boolean start_mode = false;
-				boolean end_mode = false;
-				String line;
+				input.setText(TranscribeViaReader(input.getText(),"korean.txt"));
+				error.setText("");
 				
-				while((line = reader.readLine()) != null)
+				// Algorithm //
+				
+				if((input.getText().length() == 3 || input.getText().length() == 2) && (key == KeyEvent.VK_ENTER || key == KeyEvent.VK_SPACE))
 				{
-					if(line.length() >= 1 && start_mode && line.charAt(0) != '$')
+					// This means that you have to press [Enter] or [Space] to fuse characters. I know, clunky.
+					int initialChar = (int)input.getText().charAt(0);
+					int medialChar = (int)input.getText().charAt(1);
+					int finalChar;
+					
+					if(input.getText().length() == 3)
+						finalChar = (int)input.getText().charAt(2);
+					else
+						finalChar = 0;
+					
+					switch(initialChar)
 					{
-						String A = line.substring(0,line.indexOf(":"));
-						String B = line.substring(line.indexOf(":")+1);
-						int a = A.length();
-						
-						if(text.length() >= a && text.substring(0,a).equals(A))
-							text = B + text.substring(a,text.length());
+						case 12593: initialChar = 0; break; //g
+						case 12594: initialChar = 1; break; //gg
+						case 12596: initialChar = 2; break; //n
+						case 12599: initialChar = 3; break; //d
+						case 12600: initialChar = 4; break; //dd
+						case 12601: initialChar = 5; break; //l/r
+						case 12609: initialChar = 6; break; //m
+						case 12610: initialChar = 7; break; //b
+						case 12611: initialChar = 8; break; //bb
+						case 12613: initialChar = 9; break; //s
+						case 12614: initialChar = 10; break; //ss
+						case 12615: initialChar = 11; break; //ng
+						case 12616: initialChar = 12; break; //j
+						case 12617: initialChar = 13; break; //jj
+						case 12618: initialChar = 14; break; //ch
+						case 12619: initialChar = 15; break; //k
+						case 12620: initialChar = 16; break; //t
+						case 12621: initialChar = 17; break; //p
+						case 12622: initialChar = 18; break; //h
+						default: initialChar = 0;
 					}
-					else if(line.length() >= 1 && end_mode && line.charAt(0) != '$')
+					
+					switch(medialChar)
 					{
-						String A = line.substring(0,line.indexOf(":"));
-						String B = line.substring(line.indexOf(":")+1);
-						int a = A.length();
-						
-						if(text.length() >= a && text.substring(text.length()-a).equals(A))
-							text = text.substring(0,text.length()-a) + B;
+						case 12623: medialChar = 0; break; //a
+						case 12624: medialChar = 1; break; //ae
+						case 12625: medialChar = 2; break; //ya
+						case 12626: medialChar = 3; break; //yae
+						case 12627: medialChar = 4; break; //eo
+						case 12628: medialChar = 5; break; //e
+						case 12629: medialChar = 6; break; //yeo
+						case 12630: medialChar = 7; break; //ye
+						case 12631: medialChar = 8; break; //o
+						case 12632: medialChar = 9; break; //wa
+						case 12633: medialChar = 10; break; //wae
+						case 12634: medialChar = 11; break; //oe
+						case 12635: medialChar = 12; break; //yo
+						case 12636: medialChar = 13; break; //u
+						case 12637: medialChar = 14; break; //weo
+						case 12638: medialChar = 15; break; //we
+						case 12639: medialChar = 16; break; //wi
+						case 12640: medialChar = 17; break; //yu
+						case 12641: medialChar = 18; break; //eu
+						case 12642: medialChar = 19; break; //ui
+						case 12643: medialChar = 20; break; //i
+						default: medialChar = 0;
 					}
-					else if(line.length() >= 1 && line.charAt(0) != '#' && line.charAt(0) != '$')
+					
+					switch(finalChar)
 					{
-						String A = line.substring(0,line.indexOf(":"));
-						String B = line.substring(line.indexOf(":")+1);
-						text = text.replace(A,B); // replaceAll is the regex ver of replace (replace still replaces everything)
+						case 12593: finalChar = 1; break; //g
+						case 12594: finalChar = 2; break; //gg
+						case 12595: finalChar = 3; break; //gs
+						case 12596: finalChar = 4; break; //n
+						case 12597: finalChar = 5; break; //nj
+						case 12598: finalChar = 6; break; //nh
+						case 12599: finalChar = 7; break; //d
+						case 12601: finalChar = 8; break; //l/r
+						case 12602: finalChar = 9; break; //lg
+						case 12603: finalChar = 10; break; //lm
+						case 12604: finalChar = 11; break; //lb
+						case 12605: finalChar = 12; break; //ls
+						case 12606: finalChar = 13; break; //lt
+						case 12607: finalChar = 14; break; //lp
+						case 12608: finalChar = 15; break; //lh
+						case 12609: finalChar = 16; break; //m
+						case 12610: finalChar = 17; break; //b
+						case 12612: finalChar = 18; break; //bs
+						case 12613: finalChar = 19; break; //s
+						case 12614: finalChar = 20; break; //ss
+						case 12615: finalChar = 21; break; //ng
+						case 12616: finalChar = 22; break; //j
+						case 12618: finalChar = 23; break; //ch
+						case 12619: finalChar = 24; break; //k
+						case 12620: finalChar = 25; break; //t
+						case 12621: finalChar = 26; break; //p
+						case 12622: finalChar = 27; break; //h
+						default: finalChar = 0;
 					}
-					else if(line.equals("$end"))
-						end_mode = true;
-					else if(line.equals("$start"))
-						start_mode = true;
-					else if(line.length() >= 1 && line.charAt(0) == '$')
-					{
-						end_mode = false;
-						start_mode = false;
-					}
+					
+					int c = (588*initialChar + 28*medialChar + finalChar) + 44032;
+					
+					input.setText("");
+					output.setText(output.getText() + (char)c);
 				}
+				else if(key == KeyEvent.VK_BACK_QUOTE)
+				{
+					output.setText(TranscribeViaReader(output.getText(),"hanja.txt"));
+				}
+			}
+			else
+			{
+				String language = null;
 				
-				// Universal Separator //
-				text = text.replace("||","\n");
-				text = text.replace("|","");
-				text = text.replace("\n","|");
+				for(String[] aliases : index.keySet())
+					for(String alias : aliases)
+						if(alias.equals(lang.getText()))
+							language = index.get(aliases);
 				
-				output.setText(text);
+				if(language == null)
+					language = "latin_extended.txt";
+				
+				output.setEditable(true);
+				output.setText(TranscribeViaReader(input.getText(),language));
 				error.setText("");
 			}
-			
-			/*if(language.contains("korean") && input.getText().length() >= 3 && key == KeyStroke.getKeyStroke(' ',0).getKeyCode())
-			{
-				// This means that you have to press [Space] to fuse characters. I know, clunky.
-				String text = output.getText();
-				int length = text.length();
-				int initialChar = (int)text.charAt(length-4);
-				int medialChar = (int)text.charAt(length-3);
-				int finalChar = (int)text.charAt(length-2);
-				
-				switch(initialChar)
-				{
-					case 12593: initialChar = 0; break; //g
-					case 12594: initialChar = 1; break; //gg
-					case : initialChar = 2; break; //n
-					case : initialChar = 3; break; //d
-					case : initialChar = 4; break; //dd
-					case : initialChar = 5; break; //l/r
-					case : initialChar = 6; break; //m
-					case : initialChar = 7; break; //b
-					case : initialChar = 8; break; //bb
-					case : initialChar = 9; break; //s
-					case : initialChar = 10; break; //ss
-					case : initialChar = 11; break; //ng
-					case : initialChar = 12; break; //j
-					case : initialChar = 13; break; //jj
-					case : initialChar = 14; break; //ch
-					case : initialChar = 15; break; //k
-					case : initialChar = 16; break; //t
-					case : initialChar = 17; break; //p
-					case : initialChar = 18; break; //h
-					default: initialChar = 0;
-				}
-				
-				switch(medialChar)
-				{
-					case : medialChar = 0; break; //a
-					case : medialChar = 1; break; //ae
-					case : medialChar = 2; break; //ya
-					case : medialChar = 3; break; //yae
-					case : medialChar = 4; break; //eo
-					case : medialChar = 5; break; //e
-					case : medialChar = 6; break; //yeo
-					case : medialChar = 7; break; //ye
-					case : medialChar = 8; break; //o
-					case : medialChar = 9; break; //wa
-					case : medialChar = 10; break; //wae
-					case : medialChar = 11; break; //oe
-					case : medialChar = 12; break; //yo
-					case : medialChar = 13; break; //u
-					case : medialChar = 14; break; //wo
-					case : medialChar = 15; break; //we
-					case : medialChar = 16; break; //wi
-					case : medialChar = 17; break; //yu
-					case : medialChar = 18; break; //eu
-					case : medialChar = 19; break; //ui
-					case : medialChar = 20; break; //i
-					default: medialChar = 0;
-				}
-				
-				switch(finalChar)
-				{
-					case : finalChar = 0; break; //<none>
-					case : finalChar = 1; break; //g
-					case : finalChar = 2; break; //gg
-					case : finalChar = 3; break; //gs
-					case : finalChar = 4; break; //n
-					case : finalChar = 5; break; //nj
-					case : finalChar = 6; break; //nh
-					case : finalChar = 7; break; //d
-					case : finalChar = 8; break; //l/r
-					case : finalChar = 9; break; //lg
-					case : finalChar = 10; break; //lm
-					case : finalChar = 11; break; //lb
-					case : finalChar = 12; break; //ls
-					case : finalChar = 13; break; //lt
-					case : finalChar = 14; break; //lp
-					case : finalChar = 15; break; //lh
-					case : finalChar = 16; break; //m
-					case : finalChar = 17; break; //b
-					case : finalChar = 18; break; //bs
-					case : finalChar = 19; break; //s
-					case : finalChar = 20; break; //ss
-					case : finalChar = 21; break; //ng
-					case : finalChar = 22; break; //j
-					case : finalChar = 23; break; //ch
-					case : finalChar = 24; break; //k
-					case : finalChar = 25; break; //t
-					case : finalChar = 26; break; //p
-					case : finalChar = 27; break; //h
-					default: finalChar = 0;
-				}
-				
-				int c = (588*initialChar + 28*medialChar + finalChar) + 44032;
-				
-				output.setText(text.substring(0,length-4) + (char)c);
-			}*/
-			
-			/*if(language.contains("korean"))
-			{
-				// [(initial) × 588 + (medial) × 28 + (final)] + 44032
-				
-				char[] list = output.getText().replace(" ","").toCharArray();
-				int pos = 1;
-				int init = 0;
-				int mid = 0;
-				int fin = 0;
-				
-				for(int i = 0; i < list.length; i++)
-				{
-					int val = (int)list[i];
-					
-					if(pos == 1) //initial
-					{
-						switch(val)
-						{
-							case 12593://g
-						}
-					}
-					else if(pos == 2) //medial
-					{
-						switch(val)
-						{
-							case 12593://g
-								
-						}
-					}
-					else if(pos == 3) //final
-					{
-						switch(val)
-						{
-							case 12593://g
-								
-						}
-					}
-					
-					if(pos == 3 && init != -1 && mid != -1 && fin != -1)
-					{
-						int ch = (588*init) + (28*mid) + (fin) + 44032;
-						
-					}
-					
-					if(pos > 3)
-					{
-						pos = 1;
-						init = -1;
-						mid = -1;
-						fin = -1;
-					}
-					else
-						pos++;
-				}
-				
-				
-			}*/
 		}
 		catch(Exception e) {error.setText(Arrays.toString(e.getStackTrace())+" [ERROR] "+e.toString());}
 	}
 	
-	public void keyReleased(KeyEvent e) // Run all of the text replacing when a key is released.
+	private String TranscribeViaReader(String text, String language)
 	{
-		key = e.getKeyCode();
-		updateText();
+		try
+		{
+			// "/" = mac, "\\" = windows
+			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File("config/"+language)),"UTF-8"));
+			boolean start_mode = false;
+			boolean end_mode = false;
+			String line;
+			
+			while((line = reader.readLine()) != null)
+			{
+				if(line.length() >= 1 && start_mode && line.charAt(0) != '$')
+				{
+					String A = line.substring(0,line.indexOf(":"));
+					String B = line.substring(line.indexOf(":")+1);
+					int a = A.length();
+					
+					if(text.length() >= a && text.substring(0,a).equals(A))
+						text = B + text.substring(a,text.length());
+				}
+				else if(line.length() >= 1 && end_mode && line.charAt(0) != '$')
+				{
+					String A = line.substring(0,line.indexOf(":"));
+					String B = line.substring(line.indexOf(":")+1);
+					int a = A.length();
+					
+					if(text.length() >= a && text.substring(text.length()-a).equals(A))
+						text = text.substring(0,text.length()-a) + B;
+				}
+				else if(line.length() >= 1 && line.charAt(0) != '#' && line.charAt(0) != '$')
+				{
+					String A = line.substring(0,line.indexOf(":"));
+					String B = line.substring(line.indexOf(":")+1);
+					text = text.replace(A,B); // replaceAll is the regex ver of replace (replace still replaces everything)
+				}
+				else if(line.equals("$end"))
+					end_mode = true;
+				else if(line.equals("$start"))
+					start_mode = true;
+				else if(line.length() >= 1 && line.charAt(0) == '$')
+				{
+					end_mode = false;
+					start_mode = false;
+				}
+			}
+			
+			// Universal Separator //
+			text = text.replace("||","\n");
+			text = text.replace("|","");
+			text = text.replace("\n","|");
+			
+			return text;
+		}
+		catch(Exception e) {error.setText("[ERROR] "+e.toString()+"   AT   "+Arrays.toString(e.getStackTrace()));}
+		
+		return "";
 	}
 	
 	private void init()
@@ -606,18 +567,67 @@ public class Transcription implements KeyListener
 		catch(Exception e) {error.setText("[ERROR] "+e.toString()+"   AT   "+Arrays.toString(e.getStackTrace()));}
 	}
 	
-	public void keyPressed(KeyEvent e) {}
-	public void keyTyped(KeyEvent e) {} // Exclusive to alphanumeric keys, redundant because of keyReleased().
+	public void keyPressed(KeyEvent e)
+	{
+		try
+		{
+			int k = e.getKeyCode();
+			
+			if(lang.getText().equals("vietnamese") || lang.getText().equals("vi"))
+			{
+				if(k == KeyStroke.getKeyStroke(';',0).getKeyCode() || k == KeyEvent.VK_QUOTE || k == KeyStroke.getKeyStroke('[',0).getKeyCode() || k == KeyStroke.getKeyStroke(',',0).getKeyCode() || k == KeyStroke.getKeyStroke(']',0).getKeyCode() || k == KeyStroke.getKeyStroke('.',0).getKeyCode())
+					consume = true;
+			}
+			// Backspace works on your output as well for Korean. //
+			// This needs to be here instead of at keyReleased() because otherwise, it backspaces the output even with one character in the input string.
+			// Also, do NOT use String key here. There will be a delay of one key press, even though keyPressed() is functionally better.
+			else if(lang.getText().equals("korean") || lang.getText().equals("ko"))
+			{
+				if(input.getText().length() == 0 && output.getText().length() >= 1 && k == KeyEvent.VK_BACK_SPACE)
+					output.setText(output.getText().substring(0,output.getText().length()-1));
+				
+				if(input.getText().length() == 0 && k == KeyEvent.VK_SPACE)
+					output.setText(output.getText()+" ");
+				
+				if(k == KeyEvent.VK_SPACE || k == KeyEvent.VK_BACK_QUOTE)
+					consume = true;
+			}
+		}
+		catch(Exception ex) {error.setText("[ERROR] "+ex.toString()+"   AT   "+Arrays.toString(ex.getStackTrace()));}
+	}
+	
+	public void keyReleased(KeyEvent e) // Run all of the text replacing when a key is released.
+	{
+		key = e.getKeyCode();
+		updateText();
+	}
+	
+	public void keyTyped(KeyEvent e)
+	{
+		//note: key event is zero, so do everything in keyPressed except e.consume()
+		
+		if(consume)
+		{
+			e.consume();
+			consume = false;
+		}
+	}
+	
 	public static void main(String[] args) {new Transcription();} // Run a non-static version of the main commands.
 }
 
 /*
 [Future Plans (if I ever come back to this)]
-- Korean
 - Options for "config/init" = "$option=val".
+- Korean: More customization options.
 - Vietnamese: Change modifier order.
 - Vietnamese: Change diacritic keys.
+- Chinese: Replace the pinyin system with a radicals/strokes system.
 - Note: latin_extended still has legacy Vietnamese, no point in removing it.
+
+[Changelog]
+15 April, 2019: First release. It's a reworked version of TranscribeGUI which spanned the course of two months (IE from February 2019).
+23 April, 2019: Added Korean and implemented its algorithm.
 
 Original Goal (12 April, 2019): Create a working .jar with a universal config file (you can add as many language options as you want) for the TranscriptionGUI, then quit working on it. Leave it behind.
 */
