@@ -232,7 +232,7 @@ public class Transcription implements KeyListener
 				
 				if(input.getText().length() >= 1 && key == KeyStroke.getKeyStroke('/',0).getKeyCode()) //punctuation
 				{
-					int last_index = input.getText().length()-1;
+					int last_index = input.getCaretPosition()-1;
 					String keep = input.getText().substring(0,last_index);
 					char change = input.getText().charAt(last_index);
 					
@@ -248,10 +248,11 @@ public class Transcription implements KeyListener
 					
 					input.setText(keep+change);
 				}
-				else if(input.getText().length() >= 1)
+				else if(input.getCaretPosition() >= 1)
 				{
-					int last_index = input.getText().length()-1;
-					String keep = input.getText().substring(0,last_index);
+					int last_index = input.getCaretPosition()-1;
+					String keep_pre = input.getText().substring(0,last_index);
+					String keep_post = input.getText().substring(last_index+1);
 					int change = (int)input.getText().charAt(last_index);
 					boolean changeable = false;
 					boolean changeable_d = false;
@@ -351,9 +352,15 @@ public class Transcription implements KeyListener
 						if(changeable)
 							change = vi_chars[72*alphabetCase + 6*modifier + diacritic];
 						if(changed)
-							input.setText(keep+(char)change);
+						{
+							int tmp = input.getCaretPosition();
+							input.setText(keep_pre + (char)change + keep_post);
+							input.setCaretPosition(tmp);
+						}
 					}
 				}
+				
+				error.setText("");
 			}
 			else if(lang.getText().equals("korean") || lang.getText().equals("ko"))
 			{
@@ -466,6 +473,8 @@ public class Transcription implements KeyListener
 				{
 					output.setText(TranscribeViaReader(output.getText(),"hanja.txt"));
 				}
+				
+				error.setText("");
 			}
 			else
 			{
