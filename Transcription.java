@@ -187,7 +187,7 @@ public class Transcription implements KeyListener
 	
 	public Transcription()
 	{
-		window = new JFrame("Transcription v1.1");
+		window = new JFrame("Transcription v1.1a");
 		contents = new JPanel();
 		
 		lang = new JTextField();
